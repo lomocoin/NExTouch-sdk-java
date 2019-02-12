@@ -1,13 +1,14 @@
-# Keycard Java SDK for Android and Desktop
+# NExTouch Java SDK for Android and Desktop
+> Forked from [status-keycard-java](https://github.com/status-im/status-keycard-java)
 
-This SDK simplifies integration with the [Status Keycard](https://github.com/status-im/status-keycard) in Android
-and Desktop applications. In this SDK you find both the classes needed for generic communication with SmartCards as well 
+This SDK simplifies integration with the [NExTouch Applet](https://github.com/lomocoin/u2f-javacard/) in Android
+and Desktop applications. In this SDK you find both the classes needed for generic communication with SmartCards as well
 as classes specifically addressing the Keycard.
 
 To get started, check the file ```demo-android/src/main/java/im/status/keycard/app/MainActivity.java``` which a simple
 demo application showing how the SDK works and what you can do with it.
 
-## Usage
+<!-- ## Usage
 
 You can import the SDK in your Gradle or Maven project using [Jitpack.io](https://jitpack.io).
 
@@ -25,4 +26,4 @@ dependencies {
 dependencies {
   implementation 'com.github.status-im.status-keycard-java:desktop:2.0.0'
 }
-```
+``` -->
