@@ -128,6 +128,16 @@ public class GlobalPlatformCommandSet {
   }
 
   /**
+   * Deletes the NExTouch U2F applet.
+   *
+   * @return the card response
+   * @throws IOException communication error
+   */
+  public APDUResponse deleteU2FApplet() throws IOException {
+    return delete(Identifiers.U2F_INSTANCE_AID);
+  }
+
+  /**
    * Deletes the NDEF applet instance.
    *
    * @return the card response
@@ -313,4 +323,20 @@ public class GlobalPlatformCommandSet {
   public APDUResponse installKeycardApplet() throws IOException {
     return installForInstall(Identifiers.PACKAGE_AID, Identifiers.KEYCARD_AID, Identifiers.getKeycardInstanceAID(), new byte[0]);
   }
+
+
+  /**
+   * Installs the U2F applet from the U2F package.
+   *
+   * @param params
+   * 1 byte flag : provide 01 to pass the current Fido NFC interoperability tests, or 00
+   * 2 bytes: length of the attestation certificate to load
+   * 32 bytes : private key of the attestation certificate
+   * @return the card response
+   * @throws IOException communication error
+   */
+  public APDUResponse installU2FApplet(byte[] params) throws IOException {
+    return installForInstall(Identifiers.U2F_PACKAGE_AID, Identifiers.U2F_AID, Identifiers.U2F_INSTANCE_AID, params);
+  }
+
 }

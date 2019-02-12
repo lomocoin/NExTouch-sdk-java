@@ -13,6 +13,10 @@ public class Identifiers {
   public static final byte[] NDEF_AID = Hex.decode("A000000804000102");
   public static final byte[] NDEF_INSTANCE_AID = Hex.decode("D2760000850101");
 
+  public static final byte[] U2F_PACKAGE_AID = Hex.decode("A0000006472F0000");
+  public static final byte[] U2F_AID = Hex.decode("A0000006472F0000");
+  public static final byte[] U2F_INSTANCE_AID = Hex.decode("A0000006472F0001");
+
   /**
    * Gets the instance AID of the default instance of the Keycard applet.
    *
