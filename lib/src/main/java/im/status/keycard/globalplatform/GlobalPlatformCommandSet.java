@@ -1,5 +1,7 @@
 package im.status.keycard.globalplatform;
 
+import android.util.Log;
+
 import im.status.keycard.applet.Identifiers;
 import org.bouncycastle.util.encoders.Hex;
 
@@ -158,6 +160,16 @@ public class GlobalPlatformCommandSet {
   }
 
   /**
+   * Deletes the U2F package.
+   *
+   * @return the card response
+   * @throws IOException communication error
+   */
+  public APDUResponse deleteU2fPackage() throws IOException {
+    return delete(Identifiers.U2F_PACKAGE_AID);
+  }
+
+  /**
    * Deletes the Keycard package and all applets installed from it. This is the method to use to remove a Keycard
    * installation.
    *
@@ -171,6 +183,18 @@ public class GlobalPlatformCommandSet {
   }
 
   /**
+   * Deletes the U2F package and all applets installed from it. This is the method to use to remove a U2F
+   * installation.
+   *
+   * @throws APDUException one of the DELETE commands failed
+   * @throws IOException communication error
+   */
+  public void deleteU2fAppletAndPackage() throws IOException, APDUException {
+//    deleteU2FApplet().checkSW(APDUResponse.SW_OK, APDUResponse.SW_REFERENCED_DATA_NOT_FOUND);
+    deleteU2fPackage().checkSW(APDUResponse.SW_OK, APDUResponse.SW_REFERENCED_DATA_NOT_FOUND);
+  }
+
+  /**
    * Sends a DELETE APDU with the given AID
    * @param aid the AID to the delete
    * @return the raw card response
@@ -178,12 +202,13 @@ public class GlobalPlatformCommandSet {
    * @throws IOException communication error.
    */
   public APDUResponse delete(byte[] aid) throws IOException {
+    boolean deleteDeps = true;
     byte[] data = new byte[aid.length + 2];
     data[0] = 0x4F;
     data[1] = (byte) aid.length;
     System.arraycopy(aid, 0, data, 2, aid.length);
 
-    APDUCommand cmd = new APDUCommand(0x80, INS_DELETE, 0, 0, data);
+    APDUCommand cmd = new APDUCommand(0x80, INS_DELETE, 0, deleteDeps ? 0x80 : 0x00, data);
 
     return this.secureChannel.send(cmd);
   }
@@ -199,6 +224,30 @@ public class GlobalPlatformCommandSet {
    */
   public void loadKeycardPackage(InputStream in, LoadCallback cb) throws IOException, APDUException {
     installForLoad(Identifiers.PACKAGE_AID).checkOK();
+
+    Load load = new Load(in);
+
+    byte[] block;
+    int steps = load.blocksCount();
+
+    while((block = load.nextDataBlock()) != null) {
+      load(block, (load.getCount() - 1), load.hasMore()).checkOK();
+      cb.blockLoaded(load.getCount(), steps);
+    }
+  }
+
+
+  /**
+   * Loads the NExTouch U2F package.
+   *
+   * @param in the CAP file as an InputStream
+   * @param cb the progress callback
+   *
+   * @throws IOException communication error
+   * @throws APDUException one of the INSTALL [for Load] or LOAD commands failed
+   */
+  public void loadU2fPackage(InputStream in, LoadCallback cb) throws IOException, APDUException {
+    installForLoad(Identifiers.U2F_PACKAGE_AID).checkOK();
 
     Load load = new Load(in);
 
@@ -301,6 +350,16 @@ public class GlobalPlatformCommandSet {
     APDUCommand cmd = new APDUCommand(0x80, INS_INSTALL, INSTALL_FOR_INSTALL_P1, 0, data.toByteArray());
 
     return this.secureChannel.send(cmd);
+  }
+
+  public String getCardUniqueIdentifier() throws IOException {
+    APDUCommand cmd = new APDUCommand(0x80, 0xca, 0x9f, 0x7f, new byte[0]);
+    APDUResponse resp =  this.secureChannel.send(cmd);
+    byte[] data = resp.getData();
+    CPLC cplc = CPLC.parse(data);
+    Log.d("CPLC", cplc.toString());
+    String cuid = cplc.createCardUniqueIdentifier();
+    return cuid;
   }
 
   /**
