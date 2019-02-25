@@ -1,7 +1,5 @@
 package im.status.keycard.globalplatform;
 
-import android.util.Log;
-
 import im.status.keycard.applet.Identifiers;
 import org.bouncycastle.util.encoders.Hex;
 
@@ -357,7 +355,6 @@ public class GlobalPlatformCommandSet {
     APDUResponse resp =  this.secureChannel.send(cmd);
     byte[] data = resp.getData();
     CPLC cplc = CPLC.parse(data);
-    Log.d("CPLC", cplc.toString());
     String cuid = cplc.createCardUniqueIdentifier();
     return cuid;
   }
