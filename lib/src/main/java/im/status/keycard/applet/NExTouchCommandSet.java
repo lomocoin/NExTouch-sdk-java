@@ -51,6 +51,18 @@ public class NExTouchCommandSet {
     return resp;
   }
 
+  public APDUResponse enroll(byte[] param) throws IOException {
+    APDUCommand cmd = new APDUCommand(0x00, 0x01, 0x03, 0, param);
+    APDUResponse resp =  apduChannel.send(cmd);
+    return resp;
+  }
+
+  public APDUResponse sign(byte[] param) throws IOException {
+    APDUCommand cmd = new APDUCommand(0x00, 0x02, 0x03, 0, param);
+    APDUResponse resp =  apduChannel.send(cmd);
+    return resp;
+  }
+
   public void setAttestationCert(String cert) throws IOException, APDUException {
 
     APDUCommand setCertPart1 = new APDUCommand(0xf0, 0x01, 00, 00, Hex.decode(cert.substring(0, 256)));
