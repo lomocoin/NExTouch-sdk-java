@@ -86,6 +86,19 @@ public class NExTouchCommandSet {
     return resp;
   }
 
+  public APDUResponse setSeed(String seed) throws IOException {
+    APDUCommand cmd = new APDUCommand(0x00, INS_SET_SEED, 0, 0, seed.getBytes());
+    APDUResponse resp =  apduChannel.send(cmd);
+    return resp;
+  }
+
+
+  public APDUResponse getSeed(String seed) throws IOException {
+    APDUCommand cmd = new APDUCommand(0x00, INS_GET_SEED, 0, 0, new byte[0]);
+    APDUResponse resp =  apduChannel.send(cmd);
+    return resp;
+  }
+
 
 
   public void setAttestationCert(String cert) throws IOException, APDUException {
