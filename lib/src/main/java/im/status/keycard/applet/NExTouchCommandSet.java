@@ -18,7 +18,18 @@ import im.status.keycard.io.CardChannel;
  * pre/post processing.
  */
 public class NExTouchCommandSet {
+  static final int PROPRIETARY_CLA = 0xf0;
+
+
   static final byte INS_INIT = (byte) 0xFE;
+  static final byte FIDO_INS_ENROLL = (byte)0x01;
+  static final byte FIDO_INS_SIGN = (byte)0x02;
+
+  static final byte INS_VERIFY_PIN = (byte) 0x20;
+  static final byte INS_CHANGE_PIN = (byte) 0x21;
+
+  static final byte INS_SET_SEED = (byte) 0x31;
+  static final byte INS_GET_SEED = (byte) 0x32;
 
   private final CardChannel apduChannel;
   private SecureChannelSession secureChannel;
@@ -52,22 +63,36 @@ public class NExTouchCommandSet {
   }
 
   public APDUResponse enroll(byte[] param) throws IOException {
-    APDUCommand cmd = new APDUCommand(0x00, 0x01, 0x03, 0, param);
+    APDUCommand cmd = new APDUCommand(0x00, FIDO_INS_ENROLL, 0x03, 0, param);
     APDUResponse resp =  apduChannel.send(cmd);
     return resp;
   }
 
   public APDUResponse sign(byte[] param) throws IOException {
-    APDUCommand cmd = new APDUCommand(0x00, 0x02, 0x03, 0, param);
+    APDUCommand cmd = new APDUCommand(0x00, FIDO_INS_SIGN, 0x03, 0, param);
     APDUResponse resp =  apduChannel.send(cmd);
     return resp;
   }
 
+  public APDUResponse verifyPIN(String pin) throws IOException {
+    APDUCommand cmd = new APDUCommand(0x00, INS_VERIFY_PIN, 0, 0, pin.getBytes());
+    APDUResponse resp =  apduChannel.send(cmd);
+    return resp;
+  }
+
+  public APDUResponse changePIN(String pin) throws IOException {
+    APDUCommand cmd = new APDUCommand(0x00, INS_VERIFY_PIN, 0, 0, pin.getBytes());
+    APDUResponse resp =  apduChannel.send(cmd);
+    return resp;
+  }
+
+
+
   public void setAttestationCert(String cert) throws IOException, APDUException {
 
-    APDUCommand setCertPart1 = new APDUCommand(0xf0, 0x01, 00, 00, Hex.decode(cert.substring(0, 256)));
-    APDUCommand setCertPart2 = new APDUCommand(0xf0, 0x01, 00, 0x80, Hex.decode(cert.substring(256, 512)));
-    APDUCommand setCertPart3 = new APDUCommand(0xf0, 0x01, 01, 00, Hex.decode(cert.substring(512, cert.length())));
+    APDUCommand setCertPart1 = new APDUCommand(PROPRIETARY_CLA, 0x01, 00, 00, Hex.decode(cert.substring(0, 256)));
+    APDUCommand setCertPart2 = new APDUCommand(PROPRIETARY_CLA, 0x01, 00, 0x80, Hex.decode(cert.substring(256, 512)));
+    APDUCommand setCertPart3 = new APDUCommand(PROPRIETARY_CLA, 0x01, 01, 00, Hex.decode(cert.substring(512, cert.length())));
     apduChannel.send(setCertPart1).checkOK();
     apduChannel.send(setCertPart2).checkOK();
     apduChannel.send(setCertPart3).checkOK();
