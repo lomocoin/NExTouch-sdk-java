@@ -93,7 +93,7 @@ public class NExTouchCommandSet {
   }
 
 
-  public APDUResponse getSeed(String seed) throws IOException {
+  public APDUResponse getSeed() throws IOException {
     APDUCommand cmd = new APDUCommand(0x00, INS_GET_SEED, 0, 0, new byte[0]);
     APDUResponse resp =  apduChannel.send(cmd);
     return resp;
