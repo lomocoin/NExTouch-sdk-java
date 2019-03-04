@@ -121,4 +121,12 @@ public class NExTouchCommandSet {
   }
 
 
+  /**
+   * Sends a OPEN SECURE CHANNEL APDU. Calls the corresponding method of the SecureChannel class.
+   */
+  public APDUResponse openSecureChannel(byte index, byte[] data) throws IOException {
+    return secureChannel.openSecureChannel(apduChannel, index, data);
+  }
+
+
 }
