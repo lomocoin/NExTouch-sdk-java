@@ -32,7 +32,6 @@ public class NExTouchCommandSet {
   static final byte INS_GET_SEED = (byte) 0x32;
 
   private final CardChannel apduChannel;
-  private SecureChannelSession secureChannel;
 
   /**
    * Creates a KeycardCommandSet using the given APDU Channel
@@ -40,16 +39,8 @@ public class NExTouchCommandSet {
    */
   public NExTouchCommandSet(CardChannel apduChannel) {
     this.apduChannel = apduChannel;
-    this.secureChannel = new SecureChannelSession();
   }
 
-  /**
-   * Set the SecureChannel object
-   * @param secureChannel secure channel
-   */
-  protected void setSecureChannel(SecureChannelSession secureChannel) {
-    this.secureChannel = secureChannel;
-  }
 
   public APDUResponse select() throws IOException {
     APDUCommand selectApplet = new APDUCommand(0x00, 0xA4, 4, 0, Identifiers.U2F_AID);
@@ -112,21 +103,7 @@ public class NExTouchCommandSet {
 
   }
 
-  public APDUResponse init(String pin, String puk, byte[] sharedSecret) throws IOException {
-    byte[] initData = Arrays.copyOf(pin.getBytes(), pin.length() + puk.length() + sharedSecret.length);
-    System.arraycopy(puk.getBytes(), 0, initData, pin.length(), puk.length());
-    System.arraycopy(sharedSecret, 0, initData, pin.length() + puk.length(), sharedSecret.length);
-    APDUCommand init = new APDUCommand(0x80, INS_INIT, 0, 0, secureChannel.oneShotEncrypt(initData));
-    return apduChannel.send(init);
-  }
 
-
-  /**
-   * Sends a OPEN SECURE CHANNEL APDU. Calls the corresponding method of the SecureChannel class.
-   */
-  public APDUResponse openSecureChannel(byte index, byte[] data) throws IOException {
-    return secureChannel.openSecureChannel(apduChannel, index, data);
-  }
 
 
 }
