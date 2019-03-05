@@ -35,8 +35,6 @@ public class NFCCardChannel implements CardChannel {
 
     while ((status & 0xff00) == 0x6100) {
       byte[] resp = this.isoDep.transceive(apdu);
-      Log.d("REQ ", new String(Hex.toHexString(apdu)));
-      Log.d("RESP", new String(Hex.toHexString(resp)));
       status = ((0xff & resp[resp.length - 2]) << 8) | (0xff & resp[resp.length - 1]);
       data = concat(data, resp, resp.length - 2);
       apdu = GET_RESPONSE_COMMAND;
