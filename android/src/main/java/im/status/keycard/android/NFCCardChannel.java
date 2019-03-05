@@ -5,6 +5,7 @@ import android.util.Log;
 import im.status.keycard.io.APDUCommand;
 import im.status.keycard.io.APDUResponse;
 import im.status.keycard.io.CardChannel;
+import org.bouncycastle.util.encoders.Hex;
 
 import java.io.IOException;
 
@@ -13,6 +14,8 @@ import java.io.IOException;
  */
 public class NFCCardChannel implements CardChannel {
   private static final String TAG = "CardChannel";
+  private static final byte[] GET_RESPONSE_COMMAND = {0x00, (byte) 0xc0, 0x00, 0x00, (byte) 0x00};
+
 
   private IsoDep isoDep;
 
@@ -22,13 +25,39 @@ public class NFCCardChannel implements CardChannel {
 
   @Override
   public APDUResponse send(APDUCommand cmd) throws IOException {
+
+
+
+
     byte[] apdu = cmd.serialize();
-    Log.d(TAG, String.format("COMMAND CLA: %02X INS: %02X P1: %02X P2: %02X LC: %02X", cmd.getCla(), cmd.getIns(), cmd.getP1(), cmd.getP2(), cmd.getData().length));
-    byte[] resp = this.isoDep.transceive(apdu);
-    APDUResponse response = new APDUResponse(resp);
-    Log.d(TAG, String.format("RESPONSE LEN: %02X, SW: %04X %n-----------------------", response.getData().length, response.getSw()));
-    return response;
+    int status = 0x6100;
+    byte[] data = new byte[0];
+
+    while ((status & 0xff00) == 0x6100) {
+      byte[] resp = this.isoDep.transceive(apdu);
+      Log.d("REQ ", new String(Hex.toHexString(apdu)));
+      Log.d("RESP", new String(Hex.toHexString(resp)));
+      status = ((0xff & resp[resp.length - 2]) << 8) | (0xff & resp[resp.length - 1]);
+      data = concat(data, resp, resp.length - 2);
+      apdu = GET_RESPONSE_COMMAND;
+    }
+    if (status != 0x9000) {
+      throw new IOException(String.format("Unexpected error SW: %d", status));
+    }
+    System.arraycopy(Hex.decode(Integer.toHexString(status)),0, data, data.length, 2);
+
+
+    return new APDUResponse(data);
+
   }
+
+  private static byte[] concat(byte[] a, byte[] b, int length) {
+    byte[] res = new byte[a.length + length];
+    System.arraycopy(a, 0, res, 0, a.length);
+    System.arraycopy(b, 0, res, a.length, length);
+    return res;
+  }
+
 
   @Override
   public boolean isConnected() {
