@@ -5,9 +5,9 @@ import android.util.Log;
 import im.status.keycard.io.APDUCommand;
 import im.status.keycard.io.APDUResponse;
 import im.status.keycard.io.CardChannel;
-import org.bouncycastle.util.encoders.Hex;
 
 import java.io.IOException;
+import java.math.BigInteger;
 
 /**
  * Implementation of the CardChannel interface using the Android NFC API.
@@ -42,7 +42,7 @@ public class NFCCardChannel implements CardChannel {
     if (status != 0x9000) {
       throw new IOException(String.format("Unexpected error SW: %d", status));
     }
-    System.arraycopy(Hex.decode(Integer.toHexString(status)),0, data, data.length, 2);
+    System.arraycopy( BigInteger.valueOf(status).toByteArray(),0, data, data.length, 2);
 
 
     return new APDUResponse(data);
