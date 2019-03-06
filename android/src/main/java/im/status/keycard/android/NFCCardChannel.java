@@ -32,9 +32,10 @@ public class NFCCardChannel implements CardChannel {
     byte[] apdu = cmd.serialize();
     int status = 0x6100;
     byte[] data = new byte[0];
-
+    byte[] tmpResp = new byte[2];
     while ((status & 0xff00) == 0x6100) {
       byte[] resp = this.isoDep.transceive(apdu);
+      tmpResp = resp;
       status = ((0xff & resp[resp.length - 2]) << 8) | (0xff & resp[resp.length - 1]);
       data = concat(data, resp, resp.length - 2);
       apdu = GET_RESPONSE_COMMAND;
@@ -42,7 +43,7 @@ public class NFCCardChannel implements CardChannel {
     if (status != 0x9000) {
       throw new IOException(String.format("Unexpected error SW: %d", status));
     }
-    byte[] statusBytes = BigInteger.valueOf(status).toByteArray();
+    byte[] statusBytes = {tmpResp[tmpResp.length - 2], tmpResp[tmpResp.length - 1]};
     concat(data, statusBytes, statusBytes.length);
 
 
