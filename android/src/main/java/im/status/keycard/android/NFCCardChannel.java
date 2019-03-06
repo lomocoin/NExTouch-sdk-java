@@ -42,7 +42,8 @@ public class NFCCardChannel implements CardChannel {
     if (status != 0x9000) {
       throw new IOException(String.format("Unexpected error SW: %d", status));
     }
-    System.arraycopy( BigInteger.valueOf(status).toByteArray(),0, data, data.length, 2);
+    byte[] statusBytes = BigInteger.valueOf(status).toByteArray();
+    concat(data, statusBytes, statusBytes.length);
 
 
     return new APDUResponse(data);
