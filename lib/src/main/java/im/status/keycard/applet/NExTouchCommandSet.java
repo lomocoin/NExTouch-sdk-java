@@ -27,6 +27,7 @@ public class NExTouchCommandSet {
 
   static final byte INS_VERIFY_PIN = (byte) 0x20;
   static final byte INS_CHANGE_PIN = (byte) 0x21;
+  static final byte INS_GET_PIN_CHANGED = (byte) 0x22;
 
   static final byte INS_SET_SEED = (byte) 0x31;
   static final byte INS_GET_SEED = (byte) 0x32;
@@ -72,10 +73,17 @@ public class NExTouchCommandSet {
   }
 
   public APDUResponse changePIN(String pin) throws IOException {
-    APDUCommand cmd = new APDUCommand(0x00, INS_VERIFY_PIN, 0, 0, pin.getBytes());
+    APDUCommand cmd = new APDUCommand(0x00, INS_CHANGE_PIN, 0, 0, pin.getBytes());
     APDUResponse resp =  apduChannel.send(cmd);
     return resp;
   }
+
+  public APDUResponse getPinChanged() throws IOException {
+    APDUCommand cmd = new APDUCommand(0x00, INS_GET_PIN_CHANGED, 0, 0, new byte[0]);
+    APDUResponse resp =  apduChannel.send(cmd);
+    return resp;
+  }
+
 
   public APDUResponse setSeed(String seed) throws IOException {
     APDUCommand cmd = new APDUCommand(0x00, INS_SET_SEED, 0, 0, seed.getBytes());
